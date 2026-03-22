@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Risk Landscape — OWASP Agentic Top 10 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #040810;
+    --surface: #080f1e;
+    --surface2: #0d1828;
+    --border: #1a2a42;
+    --border-bright: #2a4060;
+    --accent: #00c8ff;
+    --accent2: #ff6b35;
+    --accent3: #a0ff6b;
+    --warn: #ffb800;
+    --danger: #ff3860;
+    --text: #c8d8e8;
+    --text-dim: #5a7a9a;
+    --text-bright: #e8f4ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,200,255,0.012) 2px, rgba(0,200,255,0.012) 4px); pointer-events: none; z-index: 1000; }
+
+  /* HEADER */
+  header { border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, rgba(0,200,255,0.04) 0%, transparent 60%); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo-mark { width: 36px; height: 36px; border: 1.5px solid var(--accent); display: grid; place-items: center; font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 1px; position: relative; }
+  .logo-mark::before { content: ''; position: absolute; inset: 3px; border: 1px solid rgba(0,200,255,0.3); }
+  .header-title { font-family: var(--mono); font-size: 12px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; }
+  .header-title span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-meta { font-family: var(--mono); font-size: 10px; color: var(--text-dim); text-align: right; line-height: 1.8; }
+  .header-meta b { color: var(--accent); }
+
+  /* LANG SWITCH */
+  .lang-switch { display: flex; gap: 0; border: 1px solid var(--border-bright); overflow: hidden; }
+  .lang-btn { background: none; border: none; padding: 6px 14px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
+  .lang-btn.active { background: rgba(0,200,255,0.12); color: var(--accent); }
+  .lang-btn:hover:not(.active) { color: var(--text); }
+
+  /* NAV TABS */
+  .nav-tabs { display: flex; padding: 0 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 12px 20px; font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); cursor: pointer; transition: all 0.2s; margin-bottom: -1px; white-space: nowrap; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* SECTION HEADER */
+  .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+  .section-title { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); }
+  .section-sub { font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
+
+  /* OWASP BANNER */
+  .owasp-banner { background: var(--surface); border: 1px solid var(--border-bright); border-left: 3px solid var(--accent2); padding: 12px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
+  .owasp-badge { font-family: var(--mono); font-size: 10px; color: var(--accent2); border: 1px solid var(--accent2); padding: 3px 10px; letter-spacing: 1px; white-space: nowrap; }
+  .owasp-text { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+  .owasp-text b { color: var(--text); }
+
+  /* FILTER BUTTONS */
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .filter-label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+  .filter-btn { background: none; border: 1px solid var(--border); padding: 4px 10px; font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { border-color: var(--border-bright); color: var(--text); }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,200,255,0.08); }
+
+  /* RISK DETAIL PANEL */
+  .risk-detail { background: var(--surface); border: 1px solid var(--border-bright); border-left: 3px solid var(--accent); padding: 20px 24px; margin-bottom: 20px; display: none; animation: slideIn 0.25s ease; }
+  .risk-detail.visible { display: block; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  .risk-detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .risk-id-badge { font-family: var(--mono); font-size: 11px; padding: 3px 8px; border: 1px solid; letter-spacing: 1px; }
+  .risk-id-badge.critical { color: var(--danger); border-color: var(--danger); }
+  .risk-id-badge.high { color: var(--warn); border-color: var(--warn); }
+  .risk-id-badge.medium { color: var(--accent2); border-color: var(--accent2); }
+  .risk-detail-title { font-size: 15px; font-weight: 700; color: var(--text-bright); }
+  .risk-detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 14px; }
+  .detail-block label { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+  .detail-block p { font-size: 12px; line-height: 1.6; color: var(--text); }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border: 1px solid var(--border-bright); color: var(--text-dim); letter-spacing: 0.5px; }
+  .tag.owasp { border-color: rgba(255,107,53,0.5); color: var(--accent2); }
+  .tag.nist { border-color: rgba(0,200,255,0.4); color: var(--accent); }
+  .tag.iso { border-color: rgba(160,255,107,0.4); color: var(--accent3); }
+  .tag.finma { border-color: rgba(255,184,0,0.4); color: var(--warn); }
+  .examples-list { margin-top: 6px; }
+  .examples-list li { font-family: var(--mono); font-size: 10px; color: var(--text-dim); padding: 3px 0; padding-left: 14px; position: relative; line-height: 1.5; }
+  .examples-list li::before { content: '→'; position: absolute; left: 0; color: var(--danger); }
+
+  /* MATRIX */
+  .matrix-container { display: grid; grid-template-columns: 40px 1fr; grid-template-rows: 1fr 40px; gap: 0; height: 540px; margin-bottom: 28px; }
+  .matrix-y-label { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); display: flex; align-items: center; justify-content: center; grid-row: 1; grid-column: 1; }
+  .matrix-x-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); display: flex; align-items: center; justify-content: center; grid-row: 2; grid-column: 2; }
+  .matrix-grid { grid-row: 1; grid-column: 2; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); border: 1px solid var(--border); position: relative; background: var(--surface); }
+  .matrix-cell { border: 1px solid var(--border); position: relative; }
+  .matrix-cell[data-x="4"][data-y="4"], .matrix-cell[data-x="4"][data-y="5"], .matrix-cell[data-x="5"][data-y="4"], .matrix-cell[data-x="5"][data-y="5"], .matrix-cell[data-x="3"][data-y="5"], .matrix-cell[data-x="5"][data-y="3"] { background: rgba(255,56,96,0.08); }
+  .matrix-cell[data-x="3"][data-y="3"], .matrix-cell[data-x="3"][data-y="4"], .matrix-cell[data-x="4"][data-y="3"], .matrix-cell[data-x="2"][data-y="5"], .matrix-cell[data-x="5"][data-y="2"] { background: rgba(255,184,0,0.06); }
+  .matrix-cell[data-x="1"][data-y="1"], .matrix-cell[data-x="1"][data-y="2"], .matrix-cell[data-x="2"][data-y="1"], .matrix-cell[data-x="2"][data-y="2"] { background: rgba(160,255,107,0.04); }
+
+  .risk-bubble { position: absolute; transform: translate(-50%, -50%); cursor: pointer; z-index: 10; transition: all 0.2s; }
+  .bubble-inner { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; font-weight: 600; border: 1.5px solid currentColor; transition: all 0.2s; position: relative; }
+  .bubble-inner::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid currentColor; opacity: 0; transition: opacity 0.2s; }
+  .risk-bubble:hover .bubble-inner { transform: scale(1.28); }
+  .risk-bubble:hover .bubble-inner::after { opacity: 0.3; }
+  .bubble-label { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 4px; font-family: var(--mono); font-size: 8px; letter-spacing: 0.5px; white-space: nowrap; color: var(--text-dim); pointer-events: none; opacity: 0; transition: opacity 0.2s; background: var(--bg); padding: 1px 4px; }
+  .risk-bubble:hover .bubble-label { opacity: 1; }
+  .risk-bubble.critical .bubble-inner { color: var(--danger); background: rgba(255,56,96,0.12); }
+  .risk-bubble.high .bubble-inner { color: var(--warn); background: rgba(255,184,0,0.1); }
+  .risk-bubble.medium .bubble-inner { color: var(--accent2); background: rgba(255,107,53,0.1); }
+  .risk-bubble.low .bubble-inner { color: var(--accent3); background: rgba(160,255,107,0.08); }
+
+  .matrix-legend { display: flex; gap: 20px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); margin-top: 8px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid; }
+  .legend-dot.critical { border-color: var(--danger); background: rgba(255,56,96,0.2); }
+  .legend-dot.high { border-color: var(--warn); background: rgba(255,184,0,0.2); }
+  .legend-dot.medium { border-color: var(--accent2); background: rgba(255,107,53,0.2); }
+  .legend-dot.low { border-color: var(--accent3); background: rgba(160,255,107,0.15); }
+  .legend-label { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+
+  /* CONTROLS */
+  .domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+  .domain-card { background: var(--surface); border: 1px solid var(--border); padding: 18px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+  .domain-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .domain-card.gov::before { background: var(--accent); }
+  .domain-card.map::before { background: var(--accent2); }
+  .domain-card.meas::before { background: var(--accent3); }
+  .domain-card.manage::before { background: var(--danger); }
+  .domain-card.agent::before { background: var(--warn); }
+  .domain-card.supply::before { background: #c084fc; }
+  .domain-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+  .domain-card.active { border-color: var(--border-bright); background: var(--surface2); }
+  .domain-icon { font-size: 20px; margin-bottom: 8px; }
+  .domain-name { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .domain-card.gov .domain-name { color: var(--accent); }
+  .domain-card.map .domain-name { color: var(--accent2); }
+  .domain-card.meas .domain-name { color: var(--accent3); }
+  .domain-card.manage .domain-name { color: var(--danger); }
+  .domain-card.agent .domain-name { color: var(--warn); }
+  .domain-card.supply .domain-name { color: #c084fc; }
+  .domain-ref { font-family: var(--mono); font-size: 9px; color: var(--text-dim); margin-bottom: 8px; }
+  .domain-count { font-family: var(--mono); font-size: 22px; font-weight: 300; color: var(--text-dim); }
+  .domain-count span { font-size: 11px; margin-left: 4px; }
+  .controls-panel { background: var(--surface); border: 1px solid var(--border); display: none; animation: fadeIn 0.25s ease; }
+  .controls-panel.visible { display: block; }
+  .controls-panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-bright); }
+  .control-item { padding: 14px 20px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: start; transition: background 0.15s; }
+  .control-item:hover { background: var(--surface2); }
+  .control-item:last-child { border-bottom: none; }
+  .control-id { font-family: var(--mono); font-size: 10px; color: var(--text-dim); padding-top: 2px; }
+  .control-title { font-size: 13px; font-weight: 500; color: var(--text-bright); margin-bottom: 4px; }
+  .control-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+  .control-status { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border: 1px solid; letter-spacing: 0.5px; white-space: nowrap; margin-top: 2px; }
+  .control-status.essential { color: var(--danger); border-color: var(--danger); }
+  .control-status.important { color: var(--warn); border-color: var(--warn); }
+  .control-status.recommended { color: var(--accent3); border-color: var(--accent3); }
+
+  /* RED TEAM */
+  .redteam-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+  .attack-tree { background: var(--surface); border: 1px solid var(--border); padding: 16px; }
+  .tree-title { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .tree-item { padding: 8px 10px; margin-bottom: 4px; font-family: var(--mono); font-size: 11px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; color: var(--text-dim); display: flex; align-items: flex-start; gap: 8px; }
+  .tree-item:hover { color: var(--text); border-color: var(--border); }
+  .tree-item.active { color: var(--accent); border-color: rgba(0,200,255,0.3); background: rgba(0,200,255,0.05); }
+  .tree-indicator { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; margin-top: 4px; }
+  .attack-detail { background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+  .attack-detail-header { padding: 16px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(255,56,96,0.08) 0%, transparent 60%); }
+  .attack-phase { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--danger); margin-bottom: 4px; }
+  .attack-name { font-size: 16px; font-weight: 700; color: var(--text-bright); }
+  .attack-body { padding: 20px; }
+  .step-item { display: flex; gap: 14px; margin-bottom: 14px; position: relative; }
+  .step-item::before { content: ''; position: absolute; left: 15px; top: 28px; bottom: -14px; width: 1px; background: var(--border); }
+  .step-item:last-child::before { display: none; }
+  .step-num { width: 30px; height: 30px; border: 1px solid var(--border-bright); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--text-dim); flex-shrink: 0; background: var(--surface2); position: relative; z-index: 1; }
+  .step-action { font-size: 12px; font-weight: 500; color: var(--text-bright); margin-bottom: 2px; }
+  .step-detail { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+  .attack-meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .meta-block { background: var(--surface2); border: 1px solid var(--border); padding: 10px 14px; }
+  .meta-block label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 4px; }
+  .meta-block .meta-val { font-family: var(--mono); font-size: 11px; color: var(--text-bright); }
+  .meta-block .meta-val.critical { color: var(--danger); }
+  .meta-block .meta-val.high { color: var(--warn); }
+
+  /* WORKSHOP */
+  .workshop-container { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+  .question-deck { background: var(--surface); border: 1px solid var(--border); min-height: 480px; display: flex; flex-direction: column; }
+  .deck-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .deck-title { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+  .deck-progress { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .progress-bar { height: 2px; background: var(--border); }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+  .question-body { flex: 1; padding: 32px; display: flex; flex-direction: column; justify-content: center; }
+  .q-category { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+  .q-text { font-size: 20px; font-weight: 300; color: var(--text-bright); line-height: 1.4; margin-bottom: 24px; }
+  .q-context { font-size: 12px; color: var(--text-dim); line-height: 1.6; padding: 12px 16px; border-left: 2px solid var(--accent); background: rgba(0,200,255,0.04); margin-bottom: 24px; }
+  .answer-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .answer-btn { background: var(--surface2); border: 1px solid var(--border); padding: 10px 14px; font-family: var(--sans); font-size: 12px; color: var(--text); cursor: pointer; transition: all 0.15s; text-align: left; }
+  .answer-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .answer-btn.selected { border-color: var(--accent); background: rgba(0,200,255,0.1); color: var(--accent); }
+  .deck-nav { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .nav-btn { background: none; border: 1px solid var(--border-bright); padding: 8px 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { border-color: var(--accent); color: var(--accent); background: rgba(0,200,255,0.08); }
+  .score-panel { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 14px; }
+  .score-title { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .score-dimension { margin-bottom: 14px; }
+  .score-dim-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .score-dim-name { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .score-dim-val { font-family: var(--mono); font-size: 10px; color: var(--text-bright); }
+  .score-bar { height: 4px; background: var(--border); border-radius: 2px; }
+  .score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+  .ai-insight { background: var(--surface2); border: 1px solid var(--border-bright); border-left: 2px solid var(--accent); padding: 14px; min-height: 90px; }
+  .ai-insight-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .ai-insight-text { font-size: 11px; line-height: 1.6; color: var(--text-dim); }
+  .api-key-bar { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .api-key-bar label { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+  .api-key-bar input { flex: 1; min-width: 200px; background: var(--surface2); border: 1px solid var(--border-bright); padding: 6px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); outline: none; }
+  .api-key-bar input:focus { border-color: var(--accent); }
+  .api-key-bar button { background: rgba(0,200,255,0.1); border: 1px solid var(--accent); padding: 6px 14px; font-family: var(--mono); font-size: 10px; color: var(--accent); cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; }
+  .api-key-bar button:hover { background: rgba(0,200,255,0.2); }
+  .loading-dots::after { content: '...'; animation: dots 1.2s steps(4, end) infinite; }
+  @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+  @media (max-width: 1100px) {
+    .domain-grid { grid-template-columns: repeat(2, 1fr); }
+    .redteam-grid { grid-template-columns: 1fr; }
+    .workshop-container { grid-template-columns: 1fr; }
+    .risk-detail-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark">AI</div>
+    <div>
+      <div class="header-title">AI AGENT <span>RISK LANDSCAPE</span></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-top:2px;" data-i18n="header-sub">PRIVATE BANKING · OWASP AGENTIC TOP 10 2026</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('fr',this)">FR</button>
+      <button class="lang-btn" onclick="setLang('en',this)">EN</button>
+    </div>
+    <div class="header-meta">
+      <div>REF: <b>OWASP ASI 2026</b> · <b>NIST AI RMF</b> · <b>ISO 42001</b></div>
+      <div data-i18n="header-audience">AUDIENCE: CISO · CRO · IT GOVERNANCE</div>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('landscape',this)" data-i18n="tab1">01 · Risk Landscape</button>
+  <button class="tab-btn" onclick="switchTab('controls',this)" data-i18n="tab2">02 · Controls Framework</button>
+  <button class="tab-btn" onclick="switchTab('redteam',this)" data-i18n="tab3">03 · Red Team Scenarios</button>
+  <button class="tab-btn" onclick="switchTab('workshop',this)" data-i18n="tab4">04 · Workshop CISO</button>
+</nav>
+
+<main>
+
+<!-- TAB 1: LANDSCAPE -->
+<div id="tab-landscape" class="tab-content active">
+  <div class="owasp-banner">
+    <span class="owasp-badge">OWASP ASI 2026</span>
+    <span class="owasp-text"><b>OWASP Top 10 for Agentic Applications 2026</b> — <span data-i18n="owasp-desc">Framework peer-reviewed par 100+ experts. Risques ASI01 à ASI10 positionnés sur la matrice impact × vraisemblance.</span></span>
+  </div>
+  <div class="section-header">
+    <div class="section-title" data-i18n="matrix-title">Risk Matrix</div>
+    <div class="section-sub" data-i18n="matrix-sub">IMPACT × VRAISEMBLANCE — cliquer sur un risque pour le détail</div>
+  </div>
+  <div class="filter-bar">
+    <span class="filter-label" data-i18n="filter-label">FILTER:</span>
+    <button class="filter-btn active" onclick="setFilter('all',this)" data-i18n="filter-all">TOUS</button>
+    <button class="filter-btn" onclick="setFilter('critical',this)">CRITICAL</button>
+    <button class="filter-btn" onclick="setFilter('high',this)">HIGH</button>
+    <button class="filter-btn" onclick="setFilter('medium',this)">MEDIUM</button>
+    <button class="filter-btn" onclick="setFilter('low',this)">LOW</button>
+  </div>
+  <div id="risk-detail-panel" class="risk-detail"></div>
+  <div class="matrix-container">
+    <div class="matrix-y-label" data-i18n="axis-impact">IMPACT</div>
+    <div class="matrix-grid" id="matrix-grid"></div>
+    <div></div>
+    <div class="matrix-x-label" data-i18n="axis-likelihood">VRAISEMBLANCE</div>
+  </div>
+  <div class="matrix-legend">
+    <div class="legend-item"><div class="legend-dot critical"></div><span class="legend-label">CRITICAL</span></div>
+    <div class="legend-item"><div class="legend-dot high"></div><span class="legend-label">HIGH</span></div>
+    <div class="legend-item"><div class="legend-dot medium"></div><span class="legend-label">MEDIUM</span></div>
+    <div class="legend-item"><div class="legend-dot low"></div><span class="legend-label">LOW</span></div>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text-dim);" data-i18n="axis-legend">AXES: 1=TRÈS BAS · 5=TRÈS ÉLEVÉ</div>
+  </div>
+</div>
+
+<!-- TAB 2: CONTROLS -->
+<div id="tab-controls" class="tab-content">
+  <div class="section-header">
+    <div class="section-title" data-i18n="ctrl-title">Controls Framework</div>
+    <div class="section-sub" data-i18n="ctrl-sub">NIST AI RMF × ISO 42001 × OWASP ASI 2026 — sélectionner un domaine</div>
+  </div>
+  <div class="domain-grid" id="domain-grid"></div>
+  <div id="controls-panel" class="controls-panel"></div>
+</div>
+
+<!-- TAB 3: RED TEAM -->
+<div id="tab-redteam" class="tab-content">
+  <div class="section-header">
+    <div class="section-title" data-i18n="rt-title">Red Team Scenarios</div>
+    <div class="section-sub" data-i18n="rt-sub">Scénarios d'attaque basés sur OWASP ASI 2026 — contexte banque privée</div>
+  </div>
+  <div class="redteam-grid">
+    <div class="attack-tree">
+      <div class="tree-title" data-i18n="rt-vectors">Vecteurs d'attaque</div>
+      <div id="attack-tree-list"></div>
+    </div>
+    <div class="attack-detail" id="attack-detail-panel">
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-family:var(--mono);font-size:11px;letter-spacing:1px;" data-i18n="rt-select">← SÉLECTIONNER UN VECTEUR</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: WORKSHOP -->
+<div id="tab-workshop" class="tab-content">
+  <div class="section-header">
+    <div class="section-title" data-i18n="ws-title">Workshop CISO</div>
+    <div class="section-sub" data-i18n="ws-sub">Session de maturité IA — questions guidées avec analyse Claude</div>
+  </div>
+  <div class="api-key-bar">
+    <label data-i18n="api-label">API KEY</label>
+    <input type="password" id="api-key-input" data-i18n-placeholder="api-placeholder">
+    <button onclick="saveApiKey()" data-i18n="api-validate">VALIDER</button>
+    <span id="api-status" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);"></span>
+  </div>
+  <div class="workshop-container">
+    <div class="question-deck">
+      <div class="deck-header">
+        <div class="deck-title" data-i18n="ws-assessment">Assessment de maturité</div>
+        <div class="deck-progress" id="deck-progress">1 / 8</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:12.5%"></div></div>
+      <div class="question-body" id="question-body"></div>
+      <div class="deck-nav">
+        <button class="nav-btn" onclick="prevQuestion()" data-i18n="ws-prev">← PRÉCÉDENT</button>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim)" id="q-ref-label"></div>
+        <button class="nav-btn primary" onclick="nextQuestion()" data-i18n="ws-next">SUIVANT →</button>
+      </div>
+    </div>
+    <div>
+      <div class="score-panel">
+        <div class="score-title" data-i18n="ws-maturity">Maturité AI Risk</div>
+        <div id="score-dimensions"></div>
+      </div>
+      <div class="ai-insight" id="ai-insight-panel">
+        <div class="ai-insight-label" data-i18n="ws-analysis">Analyse IA</div>
+        <div class="ai-insight-text" id="ai-insight-text" data-i18n="ws-analysis-placeholder">Répondez aux questions pour obtenir une analyse contextuelle.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ================================================================
+// i18n
+// ================================================================
+const I18N = {
+  fr: {
+    'header-sub': 'PRIVATE BANKING · OWASP AGENTIC TOP 10 2026',
+    'header-audience': 'AUDIENCE: CISO · CRO · IT GOVERNANCE',
+    'tab1': '01 · Risk Landscape',
+    'tab2': '02 · Controls Framework',
+    'tab3': '03 · Red Team Scenarios',
+    'tab4': '04 · Workshop CISO',
+    'owasp-desc': 'Framework peer-reviewed par 100+ experts. Risques ASI01 à ASI10 positionnés sur la matrice impact × vraisemblance.',
+    'matrix-title': 'Risk Matrix',
+    'matrix-sub': 'IMPACT × VRAISEMBLANCE — cliquer sur un risque pour le détail',
+    'filter-label': 'FILTRE:',
+    'filter-all': 'TOUS',
+    'axis-impact': 'IMPACT',
+    'axis-likelihood': 'VRAISEMBLANCE',
+    'axis-legend': 'AXES: 1=TRÈS BAS · 5=TRÈS ÉLEVÉ',
+    'ctrl-title': 'Référentiel de Contrôles',
+    'ctrl-sub': 'NIST AI RMF × ISO 42001 × OWASP ASI 2026 — sélectionner un domaine',
+    'rt-title': 'Scénarios Red Team',
+    'rt-sub': 'Scénarios d\'attaque basés sur OWASP ASI 2026 — contexte banque privée',
+    'rt-vectors': 'Vecteurs d\'attaque',
+    'rt-select': '← SÉLECTIONNER UN VECTEUR',
+    'ws-title': 'Workshop CISO',
+    'ws-sub': 'Session de maturité IA — questions guidées avec analyse Claude',
+    'api-label': 'CLÉ API',
+    'api-placeholder': 'sk-ant-...  (optionnel — active l\'analyse IA)',
+    'api-validate': 'VALIDER',
+    'ws-assessment': 'Assessment de maturité',
+    'ws-prev': '← PRÉCÉDENT',
+    'ws-next': 'SUIVANT →',
+    'ws-maturity': 'Maturité AI Risk',
+    'ws-analysis': 'Analyse IA',
+    'ws-analysis-placeholder': 'Répondez aux questions pour obtenir une analyse contextuelle de votre posture de risque IA.',
+    'detail-context': 'Contexte Banque Privée',
+    'detail-mitigation': 'Mitigation',
+    'detail-refs': 'Références',
+    'detail-examples': 'Exemples d\'exploitation',
+    'severity-labels': ['Faible','Partiel','Bon','Avancé'],
+  },
+  en: {
+    'header-sub': 'PRIVATE BANKING · OWASP AGENTIC TOP 10 2026',
+    'header-audience': 'AUDIENCE: CISO · CRO · IT GOVERNANCE',
+    'tab1': '01 · Risk Landscape',
+    'tab2': '02 · Controls Framework',
+    'tab3': '03 · Red Team Scenarios',
+    'tab4': '04 · CISO Workshop',
+    'owasp-desc': 'Peer-reviewed framework by 100+ experts. Risks ASI01 to ASI10 plotted on the impact × likelihood matrix.',
+    'matrix-title': 'Risk Matrix',
+    'matrix-sub': 'IMPACT × LIKELIHOOD — click a risk for details',
+    'filter-label': 'FILTER:',
+    'filter-all': 'ALL',
+    'axis-impact': 'IMPACT',
+    'axis-likelihood': 'LIKELIHOOD',
+    'axis-legend': 'AXES: 1=VERY LOW · 5=VERY HIGH',
+    'ctrl-title': 'Controls Framework',
+    'ctrl-sub': 'NIST AI RMF × ISO 42001 × OWASP ASI 2026 — select a domain',
+    'rt-title': 'Red Team Scenarios',
+    'rt-sub': 'Attack scenarios based on OWASP ASI 2026 — private banking context',
+    'rt-vectors': 'Attack Vectors',
+    'rt-select': '← SELECT A VECTOR',
+    'ws-title': 'CISO Workshop',
+    'ws-sub': 'AI maturity assessment — guided questions with Claude analysis',
+    'api-label': 'API KEY',
+    'api-placeholder': 'sk-ant-...  (optional — enables AI analysis)',
+    'api-validate': 'SAVE',
+    'ws-assessment': 'Maturity Assessment',
+    'ws-prev': '← PREVIOUS',
+    'ws-next': 'NEXT →',
+    'ws-maturity': 'AI Risk Maturity',
+    'ws-analysis': 'AI Analysis',
+    'ws-analysis-placeholder': 'Answer the questions to get a contextual analysis of your AI risk posture.',
+    'detail-context': 'Private Banking Context',
+    'detail-mitigation': 'Mitigation',
+    'detail-refs': 'References',
+    'detail-examples': 'Exploitation Examples',
+    'severity-labels': ['Low','Partial','Good','Advanced'],
+  }
+};
+
+let currentLang = 'fr';
+
+function t(key) { return I18N[currentLang][key] || I18N['fr'][key] || key; }
+
+function setLang(lang, btn) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyTranslations();
+  // Re-render dynamic content
+  buildMatrix();
+  buildDomainGrid();
+  buildAttackTree();
+  renderQuestion();
+  updateScorePanel();
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (I18N[currentLang][key]) el.textContent = I18N[currentLang][key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (I18N[currentLang][key]) el.placeholder = I18N[currentLang][key];
+  });
+}
+
+// ================================================================
+// RISK DATA — OWASP Agentic Top 10 2026 (ASI01-ASI10)
+// ================================================================
+const RISKS_DATA = {
+  fr: [
+    {
+      id: 'ASI01', label: 'ASI01', name: 'Agent Goal Hijack',
+      severity: 'critical', impact: 5, likelihood: 4,
+      desc: 'Un attaquant manipule l\'objectif ou le plan de l\'agent en injectant des instructions malveillantes via des prompts, des données RAG, des documents uploadés, des emails ou des sorties d\'outils.',
+      context: 'En banque privée, un agent de compliance KYC traitant des documents clients peut être détourné pour exfiltrer des données UBO vers un webhook externe via un PDF piégé.',
+      mitigation: 'Validation de l\'intention avant exécution des outils, traiter tout texte externe comme non fiable, confirmation pour les actions à risque élevé, moindre privilège sur les scopes d\'outils.',
+      examples: ['Instructions malveillantes cachées dans une source RAG', 'Email instruisant l\'agent d\'uploader des données confidentielles', 'Réponse d\'outil intégrant des instructions de suivi cachées'],
+      nist: ['MEASURE 2.5', 'MANAGE 1.3', 'GOVERN 1.2'],
+      iso: ['A.6.1.2', 'A.6.2.1', 'A.8.1'],
+      finma: ['Art. 12', 'Art. 14'],
+      owasp: 'ASI01'
+    },
+    {
+      id: 'ASI02', label: 'ASI02', name: 'Tool Misuse & Exploitation',
+      severity: 'critical', impact: 5, likelihood: 3,
+      desc: 'Les agents abusent des outils par des permissions excessives, des instructions ambiguës ou des interfaces non sécurisées permettant des actions non intentionnelles ou dangereuses.',
+      context: 'Agent de reporting avec accès en écriture à la base clients déclenche des suppressions non intentionnelles. Agent d\'automatisation crée des boucles API infinies causant un DoS.',
+      mitigation: 'Moindre privilège par outil, validation de schéma avant appel d\'outil, limites de débit et plafonds budgétaires, exécution sandboxée.',
+      examples: ['Outil email sur-privilégié supprime la boîte de réception', 'Input non validé transmis à un outil SQL/shell', 'Boucles API infinies causant un DoS ou des pics de facturation'],
+      nist: ['MANAGE 1.3', 'MAP 3.2', 'MEASURE 2.7'],
+      iso: ['A.8.2', 'A.6.1.4'],
+      finma: ['Art. 8'],
+      owasp: 'ASI02'
+    },
+    {
+      id: 'ASI03', label: 'ASI03', name: 'Identity & Privilege Abuse',
+      severity: 'critical', impact: 4, likelihood: 4,
+      desc: 'Les agents héritent, abusent ou conservent des privilèges de façon incorrecte à travers les sessions, les utilisateurs ou les workflows délégués.',
+      context: 'En banque privée avec SSO, un agent délégué par un manager conserve des accès administrateur après la fin de la tâche. Risque de cross-user data leaks critique.',
+      mitigation: 'Tokens limités dans le temps et à la tâche, isolation de la mémoire par session, re-vérification des permissions avant les appels sensibles, RBAC strict.',
+      examples: ['Délégation manager → accès admin persistant', 'Mémoire conservant des secrets d\'utilisateurs précédents', 'Attaque confused deputy entre agents'],
+      nist: ['GOVERN 2.1', 'MANAGE 1.4', 'MAP 1.5'],
+      iso: ['A.6.1.3', 'A.7.1'],
+      finma: ['Art. 9', 'Art. 15'],
+      owasp: 'ASI03'
+    },
+    {
+      id: 'ASI04', label: 'ASI04', name: 'Agentic Supply Chain',
+      severity: 'high', impact: 4, likelihood: 3,
+      desc: 'Les agents chargent dynamiquement des prompts, plugins, outils, agent cards et modèles. Des composants compromis ou usurpés introduisent des risques de supply chain à l\'exécution.',
+      context: 'Un plugin MCP utilisé par des agents bancaires est compromis via typosquatting. Un template de prompt distant est remplacé par une version malveillante sans détection.',
+      mitigation: 'Manifestes d\'outils signés, suivi SBOM/AIBOM, registres en liste blanche uniquement, vérification des signatures à l\'exécution.',
+      examples: ['Outil typosquatté dans un marketplace', 'Template de prompt distant remplacé', 'Agent card non signée injectant un comportement caché'],
+      nist: ['MAP 5.1', 'MAP 5.2', 'GOVERN 4.1'],
+      iso: ['A.6.1.1', 'A.5.1', 'A.5.2'],
+      finma: ['Art. 10', 'Art. 11'],
+      owasp: 'ASI04'
+    },
+    {
+      id: 'ASI05', label: 'ASI05', name: 'Unexpected Code Execution',
+      severity: 'high', impact: 5, likelihood: 2,
+      desc: 'Les agents qui génèrent ou exécutent du code peuvent être manipulés pour exécuter des instructions malveillantes via injection de prompt ou désérialisation non sécurisée.',
+      context: 'Agent de reporting financier générant du Python pour analyser des portefeuilles — manipulé pour exécuter des commandes shell et exfiltrer des données via réseau.',
+      mitigation: 'Séparer la génération de l\'exécution, conteneurs sandboxés non-root, approbation manuelle pour le code à risque élevé, scan du code généré.',
+      examples: ['Injection de prompt causant l\'exécution de commandes shell', 'Désérialisation non sécurisée', 'Dépendance malveillante auto-installée'],
+      nist: ['MEASURE 2.6', 'MANAGE 1.1'],
+      iso: ['A.8.2', 'A.6.2.4'],
+      finma: ['Art. 12'],
+      owasp: 'ASI05'
+    },
+    {
+      id: 'ASI06', label: 'ASI06', name: 'Memory & Context Poisoning',
+      severity: 'high', impact: 4, likelihood: 3,
+      desc: 'Les attaquants injectent des données malveillantes ou trompeuses dans les systèmes de mémoire (RAG, embeddings, résumés) influençant le raisonnement futur de l\'agent.',
+      context: 'Empoisonnement de la base de connaissance réglementaire d\'un agent de compliance pour induire des décisions biaisées sur des transactions suspectes.',
+      mitigation: 'Validation avant écriture en mémoire, segmentation de la mémoire, expiration et capacité de rollback, vérification d\'intégrité.',
+      examples: ['Entrée de base de connaissance empoisonnée', 'Données malveillantes résumées en mémoire long terme', 'Contamination de mémoire partagée inter-agents'],
+      nist: ['GOVERN 1.2', 'MEASURE 2.5'],
+      iso: ['A.7.2', 'A.6.2.1'],
+      finma: [],
+      owasp: 'ASI06'
+    },
+    {
+      id: 'ASI07', label: 'ASI07', name: 'Insecure Inter-Agent Comm',
+      severity: 'high', impact: 3, likelihood: 4,
+      desc: 'Plusieurs agents communiquant via APIs, bus ou mémoire partagée sans authentification forte ni validation d\'intégrité.',
+      context: 'Pipeline multi-agents bancaire : un agent compromis forge des messages semblant provenir d\'un agent de validation compliance pour approuver des transactions.',
+      mitigation: 'mTLS mutuel, signature des messages, protection anti-replay, nonce + timestamp, logging des interactions inter-agents.',
+      examples: ['Message d\'agent forgé déclenchant une action', 'Replay d\'une transaction valide', 'Communication non chiffrée interceptée'],
+      nist: ['GOVERN 2.2', 'MAP 3.5'],
+      iso: ['A.6.1.3', 'A.8.4'],
+      finma: ['Art. 12'],
+      owasp: 'ASI07'
+    },
+    {
+      id: 'ASI08', label: 'ASI08', name: 'Cascading Failures',
+      severity: 'medium', impact: 4, likelihood: 3,
+      desc: 'Une seule défaillance se propage à travers les agents, workflows ou tenants causant un impact systémique.',
+      context: 'Un outil corrompu dans un pipeline de surveillance AML affecte simultanément plusieurs agents, créant des boucles de retry qui amplifient la défaillance.',
+      mitigation: 'Circuit breakers, rate limiting, isolation des tenants, plafonds de retry, monitoring des patterns de fan-out.',
+      examples: ['Outil corrompu affectant plusieurs agents', 'Boucles de retry amplifiant la défaillance', 'Mémoire partagée propageant un état corrompu'],
+      nist: ['MANAGE 3.1', 'MAP 3.1'],
+      iso: ['A.8.3', 'A.9.1'],
+      finma: ['Art. 8'],
+      owasp: 'ASI08'
+    },
+    {
+      id: 'ASI09', label: 'ASI09', name: 'Human-Agent Trust Exploit',
+      severity: 'medium', impact: 3, likelihood: 5,
+      desc: 'Les humains font trop confiance aux outputs confiants des agents, approuvant des actions dangereuses sans revue adéquate.',
+      context: 'Un agent de conseil financier génère une recommandation incorrecte mais très confiante. Le gestionnaire approuve sans vérifier — exploitation de l\'automation bias.',
+      mitigation: 'Afficher le niveau de risque et la trace source, forcer la revue sur les actions critiques, scores de confiance explicites, formation au risque IA.',
+      examples: ['Action financière confiante mais incorrecte', 'Résumé trompeur influençant une décision dirigeante', 'Fatigue d\'approbation menant à une confirmation aveugle'],
+      nist: ['GOVERN 1.6', 'MEASURE 2.1'],
+      iso: ['A.6.2.2', 'A.9.2'],
+      finma: ['Art. 6', 'Art. 7'],
+      owasp: 'ASI09'
+    },
+    {
+      id: 'ASI10', label: 'ASI10', name: 'Rogue Agent Behavior',
+      severity: 'medium', impact: 3, likelihood: 3,
+      desc: 'Les agents dérivent de leur comportement prévu en raison de mises à jour de modèle, mutation de mémoire, changement d\'environnement ou comportement émergent.',
+      context: 'Un agent de surveillance de portefeuille change silencieusement de comportement après une mise à jour du modèle LLM sous-jacent, sans que personne ne le détecte.',
+      mitigation: 'Évaluation continue, re-validation des politiques, capacité de kill-switch, monitoring comportemental à l\'exécution, rollback après mises à jour.',
+      examples: ['Agent contournant les contraintes progressivement', 'Mise à jour de modèle altérant silencieusement le comportement', 'Accumulation mémoire modifiant le biais de décision'],
+      nist: ['MANAGE 4.1', 'MEASURE 2.8'],
+      iso: ['A.8.3', 'A.9.1'],
+      finma: ['Art. 5', 'Art. 12'],
+      owasp: 'ASI10'
+    },
+  ],
+  en: [
+    {
+      id: 'ASI01', label: 'ASI01', name: 'Agent Goal Hijack',
+      severity: 'critical', impact: 5, likelihood: 4,
+      desc: 'An attacker manipulates an agent\'s goal or plan by injecting malicious instructions through prompts, RAG data, uploaded documents, emails, or tool outputs.',
+      context: 'In private banking, a KYC compliance agent processing client documents can be hijacked to exfiltrate UBO data to an external webhook via a weaponized PDF.',
+      mitigation: 'Intent validation before tool execution, treat all external text as untrusted, confirmation for high-risk actions, least privilege on tool scopes.',
+      examples: ['Malicious instructions hidden in RAG source', 'Email instructing agent to upload confidential data', 'Tool response embedding hidden follow-up instructions'],
+      nist: ['MEASURE 2.5', 'MANAGE 1.3', 'GOVERN 1.2'],
+      iso: ['A.6.1.2', 'A.6.2.1', 'A.8.1'],
+      finma: ['Art. 12', 'Art. 14'],
+      owasp: 'ASI01'
+    },
+    {
+      id: 'ASI02', label: 'ASI02', name: 'Tool Misuse & Exploitation',
+      severity: 'critical', impact: 5, likelihood: 3,
+      desc: 'Agents misuse tools through excessive permissions, ambiguous instructions, or unsafe tool interfaces allowing unintended or dangerous actions.',
+      context: 'A reporting agent with write access to the client database triggers unintentional deletions. An automation agent creates infinite API loops causing a DoS.',
+      mitigation: 'Least privilege per tool, schema validation before tool calls, rate limits and budget caps, sandboxed execution.',
+      examples: ['Over-privileged email tool deletes inbox', 'Unvalidated input forwarded to SQL/shell tool', 'Infinite API loops causing DoS or billing spikes'],
+      nist: ['MANAGE 1.3', 'MAP 3.2', 'MEASURE 2.7'],
+      iso: ['A.8.2', 'A.6.1.4'],
+      finma: ['Art. 8'],
+      owasp: 'ASI02'
+    },
+    {
+      id: 'ASI03', label: 'ASI03', name: 'Identity & Privilege Abuse',
+      severity: 'critical', impact: 4, likelihood: 4,
+      desc: 'Agents improperly inherit, misuse, or retain privileges across sessions, users, or delegated workflows.',
+      context: 'In a private bank with SSO, an agent delegated by a manager retains admin access after the task ends. Critical risk of cross-user data leaks.',
+      mitigation: 'Task-scoped time-limited tokens, memory isolation per session, re-verify permissions before sensitive calls, strict RBAC.',
+      examples: ['Manager delegates task → full admin access persists', 'Memory retaining secrets from previous users', 'Confused deputy attack between agents'],
+      nist: ['GOVERN 2.1', 'MANAGE 1.4', 'MAP 1.5'],
+      iso: ['A.6.1.3', 'A.7.1'],
+      finma: ['Art. 9', 'Art. 15'],
+      owasp: 'ASI03'
+    },
+    {
+      id: 'ASI04', label: 'ASI04', name: 'Agentic Supply Chain',
+      severity: 'high', impact: 4, likelihood: 3,
+      desc: 'Agents dynamically load prompts, plugins, tools, agent cards, and models. Compromised or impersonated components introduce runtime supply chain risk.',
+      context: 'An MCP plugin used by banking agents is compromised via typosquatting. A remote prompt template is silently replaced with a malicious version.',
+      mitigation: 'Signed tool manifests, SBOM/AIBOM tracking, allowlist registries only, runtime signature verification.',
+      examples: ['Typosquatted tool in marketplace', 'Remote prompt template replaced', 'Unsigned agent card injecting hidden behavior'],
+      nist: ['MAP 5.1', 'MAP 5.2', 'GOVERN 4.1'],
+      iso: ['A.6.1.1', 'A.5.1', 'A.5.2'],
+      finma: ['Art. 10', 'Art. 11'],
+      owasp: 'ASI04'
+    },
+    {
+      id: 'ASI05', label: 'ASI05', name: 'Unexpected Code Execution',
+      severity: 'high', impact: 5, likelihood: 2,
+      desc: 'Agents that generate or execute code may be manipulated into running malicious instructions via prompt injection or insecure deserialization.',
+      context: 'A financial reporting agent generating Python to analyze portfolios — manipulated to execute shell commands and exfiltrate data over the network.',
+      mitigation: 'Separate generation from execution, non-root sandboxed containers, manual approval for high-risk code, scan generated code.',
+      examples: ['Prompt injection causing shell command execution', 'Insecure deserialization', 'Malicious dependency auto-installed'],
+      nist: ['MEASURE 2.6', 'MANAGE 1.1'],
+      iso: ['A.8.2', 'A.6.2.4'],
+      finma: ['Art. 12'],
+      owasp: 'ASI05'
+    },
+    {
+      id: 'ASI06', label: 'ASI06', name: 'Memory & Context Poisoning',
+      severity: 'high', impact: 4, likelihood: 3,
+      desc: 'Attackers inject malicious or misleading data into memory systems (RAG, embeddings, summaries) that influence future agent reasoning.',
+      context: 'Poisoning the regulatory knowledge base of a compliance agent to induce biased decisions on suspicious transactions.',
+      mitigation: 'Validate before writing to memory, memory segmentation, expiration and rollback capability, integrity checks.',
+      examples: ['Poisoned knowledge base entry', 'Malicious data summarized into long-term memory', 'Cross-agent shared memory contamination'],
+      nist: ['GOVERN 1.2', 'MEASURE 2.5'],
+      iso: ['A.7.2', 'A.6.2.1'],
+      finma: [],
+      owasp: 'ASI06'
+    },
+    {
+      id: 'ASI07', label: 'ASI07', name: 'Insecure Inter-Agent Comm',
+      severity: 'high', impact: 3, likelihood: 4,
+      desc: 'Multiple agents communicating via APIs, buses, or shared memory without strong authentication or integrity validation.',
+      context: 'Banking multi-agent pipeline: a compromised agent forges messages appearing to come from a compliance validation agent to approve transactions.',
+      mitigation: 'Mutual TLS, message signing, anti-replay protection, nonce + timestamp, logging of inter-agent interactions.',
+      examples: ['Forged agent message triggering action', 'Replay of valid transaction', 'Intercepted unencrypted communication'],
+      nist: ['GOVERN 2.2', 'MAP 3.5'],
+      iso: ['A.6.1.3', 'A.8.4'],
+      finma: ['Art. 12'],
+      owasp: 'ASI07'
+    },
+    {
+      id: 'ASI08', label: 'ASI08', name: 'Cascading Failures',
+      severity: 'medium', impact: 4, likelihood: 3,
+      desc: 'A single failure propagates across agents, workflows, or tenants causing systemic impact.',
+      context: 'A corrupted tool in an AML monitoring pipeline simultaneously affects multiple agents, creating retry loops that amplify the failure.',
+      mitigation: 'Circuit breakers, rate limiting, tenant isolation, retry caps, fan-out pattern monitoring.',
+      examples: ['Corrupted tool affecting multiple agents', 'Retry loops amplifying failure', 'Shared memory spreading bad state'],
+      nist: ['MANAGE 3.1', 'MAP 3.1'],
+      iso: ['A.8.3', 'A.9.1'],
+      finma: ['Art. 8'],
+      owasp: 'ASI08'
+    },
+    {
+      id: 'ASI09', label: 'ASI09', name: 'Human-Agent Trust Exploit',
+      severity: 'medium', impact: 3, likelihood: 5,
+      desc: 'Humans over-trust confident agent outputs, approving dangerous actions without proper review.',
+      context: 'A financial advisory agent generates an incorrect but highly confident recommendation. The portfolio manager approves without verifying — automation bias exploitation.',
+      mitigation: 'Display risk level and source trace, force review on critical actions, explicit confidence scores, AI risk training.',
+      examples: ['Confident but incorrect financial action', 'Misleading summary influencing executive decision', 'Approval fatigue leading to blind confirmation'],
+      nist: ['GOVERN 1.6', 'MEASURE 2.1'],
+      iso: ['A.6.2.2', 'A.9.2'],
+      finma: ['Art. 6', 'Art. 7'],
+      owasp: 'ASI09'
+    },
+    {
+      id: 'ASI10', label: 'ASI10', name: 'Rogue Agent Behavior',
+      severity: 'medium', impact: 3, likelihood: 3,
+      desc: 'Agents drift from intended behavior due to model updates, memory mutation, environment change, or emergent behavior.',
+      context: 'A portfolio monitoring agent silently changes behavior after an update to the underlying LLM model, undetected by anyone.',
+      mitigation: 'Continuous evaluation, policy re-validation, kill-switch capability, runtime behavioral monitoring, rollback after updates.',
+      examples: ['Agent bypassing constraints over time', 'Model update silently altering behavior', 'Memory accumulation changing decision bias'],
+      nist: ['MANAGE 4.1', 'MEASURE 2.8'],
+      iso: ['A.8.3', 'A.9.1'],
+      finma: ['Art. 5', 'Art. 12'],
+      owasp: 'ASI10'
+    },
+  ]
+};
+
+// ================================================================
+// CONTROLS DATA
+// ================================================================
+const CONTROLS_DATA = {
+  fr: {
+    gov: {
+      name: 'Gouvernance', icon: '⬡', ref: 'NIST AI RMF · GOVERN / ISO 42001 §5', cls: 'gov',
+      items: [
+        { id: 'GOV-01', title: 'Politique IA Formelle', desc: 'Politique documentée encadrant l\'usage des agents IA, rôles, responsabilités et processus d\'approbation. Couvre ASI01, ASI09, ASI10.', status: 'essential', nist: 'GOVERN 1.1', iso: '§5.2', owasp: 'ASI01·ASI09' },
+        { id: 'GOV-02', title: 'Risk Appetite Statement IA', desc: 'Définition explicite du niveau de risque acceptable pour les agents IA, aligné avec le risk appetite global.', status: 'essential', nist: 'GOVERN 1.4', iso: '§5.4', owasp: 'ASI08·ASI10' },
+        { id: 'GOV-03', title: 'AI Ownership & Accountability', desc: 'AI System Owner désigné pour chaque agent déployé. Responsabilités claires incluant surveillance comportementale (ASI10).', status: 'essential', nist: 'GOVERN 2.1', iso: '§5.3', owasp: 'ASI10' },
+        { id: 'GOV-04', title: 'Human-in-the-Loop Policy', desc: 'Définition des décisions nécessitant validation humaine obligatoire. Contre-mesure principale contre ASI09.', status: 'essential', nist: 'GOVERN 2.2', iso: '§A.6.1.4', owasp: 'ASI09' },
+        { id: 'GOV-05', title: 'AI Incident Response Plan', desc: 'Plan de réponse aux incidents IA avec kill-switch, containment et notification FINMA. Couvre ASI08, ASI10.', status: 'essential', nist: 'GOVERN 3.2', iso: '§8.3', owasp: 'ASI08·ASI10' },
+      ]
+    },
+    map: {
+      name: 'Map & Inventory', icon: '◈', ref: 'NIST AI RMF · MAP / ISO 42001 §6', cls: 'map',
+      items: [
+        { id: 'MAP-01', title: 'Inventaire des Agents IA', desc: 'Inventaire exhaustif de tous les agents déployés avec purpose, données traitées, outils accessibles et niveau de risque.', status: 'essential', nist: 'MAP 1.1', iso: '§8.1', owasp: 'ASI01-ASI10' },
+        { id: 'MAP-02', title: 'Threat Modeling Agentic', desc: 'Modélisation des menaces spécifique agents : ASI01 (goal hijack), ASI02 (tool misuse), ASI03 (identity), ASI07 (inter-agent).', status: 'essential', nist: 'MAP 3.1', iso: '§6.1.2', owasp: 'ASI01·ASI02·ASI07' },
+        { id: 'MAP-03', title: 'Cartographie Tool Permissions', desc: 'Cartographie des permissions de chaque agent sur chaque outil. Base du least privilege (ASI02) et de l\'identity model (ASI03).', status: 'essential', nist: 'MAP 1.5', iso: '§A.7.1', owasp: 'ASI02·ASI03' },
+        { id: 'MAP-04', title: 'AIBOM / Supply Chain Mapping', desc: 'AI Bill of Materials pour tous les composants agents : plugins, MCP servers, modèles, templates. Fondation de ASI04.', status: 'essential', nist: 'MAP 5.1', iso: '§A.5.2', owasp: 'ASI04' },
+      ]
+    },
+    meas: {
+      name: 'Measure & Test', icon: '◉', ref: 'NIST AI RMF · MEASURE / ISO 42001 §8', cls: 'meas',
+      items: [
+        { id: 'MEA-01', title: 'Red Teaming Agentic', desc: 'Programme de red teaming ciblant ASI01 (injection), ASI02 (tool abuse), ASI05 (code exec), ASI07 (inter-agent spoofing).', status: 'essential', nist: 'MEASURE 2.6', iso: '§A.6.2.4', owasp: 'ASI01·ASI02·ASI05' },
+        { id: 'MEA-02', title: 'Behavioral Monitoring', desc: 'Surveillance comportementale des agents en production. Détection de ASI10 (rogue behavior) et ASI08 (cascading failures).', status: 'essential', nist: 'MEASURE 2.8', iso: '§9.1', owasp: 'ASI08·ASI10' },
+        { id: 'MEA-03', title: 'Audit Logging Immuable', desc: 'Logging complet de toutes les actions agents (prompts, tool calls, outputs, inter-agent messages). Rétention FINMA.', status: 'essential', nist: 'MEASURE 2.7', iso: '§A.8.3', owasp: 'ASI01-ASI10' },
+        { id: 'MEA-04', title: 'Explainability Assessment', desc: 'Évaluation explicabilité pour décisions à impact client (KYC, AML, crédit). Contre ASI09 (automation bias).', status: 'essential', nist: 'MEASURE 2.1', iso: '§A.9.2', owasp: 'ASI09' },
+        { id: 'MEA-05', title: 'Memory Integrity Checks', desc: 'Vérification d\'intégrité des vector stores et mémoires persistantes. Protection contre ASI06.', status: 'important', nist: 'MEASURE 2.5', iso: '§A.7.2', owasp: 'ASI06' },
+      ]
+    },
+    manage: {
+      name: 'Manage & Respond', icon: '◆', ref: 'NIST AI RMF · MANAGE / ISO 42001 §9', cls: 'manage',
+      items: [
+        { id: 'MAN-01', title: 'Least Privilege per Agent', desc: 'Permissions minimales pour chaque agent sur chaque outil et API. Contre-mesure primaire ASI02 et ASI03.', status: 'essential', nist: 'MANAGE 1.3', iso: '§A.8.2', owasp: 'ASI02·ASI03' },
+        { id: 'MAN-02', title: 'Kill-Switch & Rollback', desc: 'Mécanisme de désactivation d\'urgence testable en < 5 min. Rollback de modèle après mise à jour. Critique pour ASI10.', status: 'essential', nist: 'MANAGE 4.1', iso: '§8.3', owasp: 'ASI10·ASI08' },
+        { id: 'MAN-03', title: 'Circuit Breakers', desc: 'Implémentation de circuit breakers et plafonds de retry pour prévenir ASI08 (cascading failures).', status: 'essential', nist: 'MANAGE 3.1', iso: '§A.9.1', owasp: 'ASI08' },
+        { id: 'MAN-04', title: 'Session-Scoped Tokens', desc: 'Tokens à durée de vie limitée et scoped à la tâche. Isolation mémoire par session/utilisateur. Contre ASI03.', status: 'essential', nist: 'MANAGE 1.4', iso: '§A.7.1', owasp: 'ASI03' },
+      ]
+    },
+    agent: {
+      name: 'Agentic Specifics', icon: '▲', ref: 'OWASP ASI 2026 · FINMA 23/1', cls: 'agent',
+      items: [
+        { id: 'AGT-01', title: 'Input/Output Sandboxing', desc: 'Validation stricte des inputs externes (emails, docs, APIs) avant traitement agent. Séparation données/instructions. ASI01.', status: 'essential', nist: 'MEASURE 2.5', iso: '§A.6.1.2', owasp: 'ASI01' },
+        { id: 'AGT-02', title: 'Code Execution Sandbox', desc: 'Isolation complète de l\'exécution de code généré par les agents. Non-root, réseau restreint, timeout. ASI05.', status: 'essential', nist: 'MANAGE 1.1', iso: '§A.8.2', owasp: 'ASI05' },
+        { id: 'AGT-03', title: 'Inter-Agent mTLS + Signing', desc: 'Authentification mutuelle et signature des messages entre agents. Anti-replay. Contre ASI07.', status: 'essential', nist: 'GOVERN 2.2', iso: '§A.6.1.3', owasp: 'ASI07' },
+        { id: 'AGT-04', title: 'Memory Segmentation', desc: 'Isolation stricte des mémoires par agent, par session et par utilisateur. Expiration planifiée. Contre ASI06.', status: 'essential', nist: 'GOVERN 1.2', iso: '§A.7.2', owasp: 'ASI06' },
+        { id: 'AGT-05', title: 'Confidence & Source Display', desc: 'Affichage obligatoire des scores de confiance et de la trace source dans les outputs. Contre ASI09 (automation bias).', status: 'important', nist: 'GOVERN 1.6', iso: '§A.9.2', owasp: 'ASI09' },
+      ]
+    },
+    supply: {
+      name: 'Supply Chain IA', icon: '◭', ref: 'ISO 42001 §A.6 · OWASP ASI04', cls: 'supply',
+      items: [
+        { id: 'SC-01', title: 'LLM Provider Due Diligence', desc: 'Évaluation conformité fournisseurs LLM (SOC2, ISO27001, data processing, rétention). Critique pour tout agent.', status: 'essential', nist: 'MAP 5.1', iso: '§A.6.1.5', owasp: 'ASI04' },
+        { id: 'SC-02', title: 'Tool/Plugin Signing', desc: 'Vérification cryptographique de tous les outils, plugins et MCP servers chargés dynamiquement. Contre ASI04.', status: 'essential', nist: 'MAP 5.2', iso: '§A.6.1.1', owasp: 'ASI04' },
+        { id: 'SC-03', title: 'Model Integrity Verification', desc: 'Vérification d\'intégrité des modèles déployés. Détection d\'altération post-distribution. Contre model poisoning.', status: 'important', nist: 'MEASURE 1.1', iso: '§A.6.1.1', owasp: 'ASI04' },
+        { id: 'SC-04', title: 'Exit Strategy par Provider', desc: 'Stratégie de sortie documentée pour chaque fournisseur LLM critique. Multi-provider fallback.', status: 'important', nist: 'MANAGE 4.2', iso: '§A.5.2', owasp: 'ASI04' },
+      ]
+    }
+  },
+  en: {
+    gov: {
+      name: 'Governance', icon: '⬡', ref: 'NIST AI RMF · GOVERN / ISO 42001 §5', cls: 'gov',
+      items: [
+        { id: 'GOV-01', title: 'Formal AI Policy', desc: 'Documented policy governing AI agent usage, roles, responsibilities, and approval processes. Covers ASI01, ASI09, ASI10.', status: 'essential', nist: 'GOVERN 1.1', iso: '§5.2', owasp: 'ASI01·ASI09' },
+        { id: 'GOV-02', title: 'AI Risk Appetite Statement', desc: 'Explicit definition of acceptable risk level for AI agents, aligned with the global risk appetite.', status: 'essential', nist: 'GOVERN 1.4', iso: '§5.4', owasp: 'ASI08·ASI10' },
+        { id: 'GOV-03', title: 'AI Ownership & Accountability', desc: 'Designated AI System Owner for each deployed agent. Clear responsibilities including behavioral monitoring (ASI10).', status: 'essential', nist: 'GOVERN 2.1', iso: '§5.3', owasp: 'ASI10' },
+        { id: 'GOV-04', title: 'Human-in-the-Loop Policy', desc: 'Definition of decisions requiring mandatory human validation. Primary countermeasure against ASI09.', status: 'essential', nist: 'GOVERN 2.2', iso: '§A.6.1.4', owasp: 'ASI09' },
+        { id: 'GOV-05', title: 'AI Incident Response Plan', desc: 'AI incident response plan with kill-switch, containment, and FINMA notification. Covers ASI08, ASI10.', status: 'essential', nist: 'GOVERN 3.2', iso: '§8.3', owasp: 'ASI08·ASI10' },
+      ]
+    },
+    map: {
+      name: 'Map & Inventory', icon: '◈', ref: 'NIST AI RMF · MAP / ISO 42001 §6', cls: 'map',
+      items: [
+        { id: 'MAP-01', title: 'AI Agent Inventory', desc: 'Comprehensive inventory of all deployed agents with purpose, data processed, accessible tools, and risk level.', status: 'essential', nist: 'MAP 1.1', iso: '§8.1', owasp: 'ASI01-ASI10' },
+        { id: 'MAP-02', title: 'Agentic Threat Modeling', desc: 'Agent-specific threat modeling: ASI01 (goal hijack), ASI02 (tool misuse), ASI03 (identity), ASI07 (inter-agent).', status: 'essential', nist: 'MAP 3.1', iso: '§6.1.2', owasp: 'ASI01·ASI02·ASI07' },
+        { id: 'MAP-03', title: 'Tool Permission Mapping', desc: 'Permission mapping for each agent on each tool. Foundation for least privilege (ASI02) and identity model (ASI03).', status: 'essential', nist: 'MAP 1.5', iso: '§A.7.1', owasp: 'ASI02·ASI03' },
+        { id: 'MAP-04', title: 'AIBOM / Supply Chain Map', desc: 'AI Bill of Materials for all agent components: plugins, MCP servers, models, templates. Foundation for ASI04.', status: 'essential', nist: 'MAP 5.1', iso: '§A.5.2', owasp: 'ASI04' },
+      ]
+    },
+    meas: {
+      name: 'Measure & Test', icon: '◉', ref: 'NIST AI RMF · MEASURE / ISO 42001 §8', cls: 'meas',
+      items: [
+        { id: 'MEA-01', title: 'Agentic Red Teaming', desc: 'Red teaming program targeting ASI01 (injection), ASI02 (tool abuse), ASI05 (code exec), ASI07 (inter-agent spoofing).', status: 'essential', nist: 'MEASURE 2.6', iso: '§A.6.2.4', owasp: 'ASI01·ASI02·ASI05' },
+        { id: 'MEA-02', title: 'Behavioral Monitoring', desc: 'Behavioral surveillance of agents in production. Detection of ASI10 (rogue behavior) and ASI08 (cascading failures).', status: 'essential', nist: 'MEASURE 2.8', iso: '§9.1', owasp: 'ASI08·ASI10' },
+        { id: 'MEA-03', title: 'Immutable Audit Logging', desc: 'Complete logging of all agent actions (prompts, tool calls, outputs, inter-agent messages). FINMA retention.', status: 'essential', nist: 'MEASURE 2.7', iso: '§A.8.3', owasp: 'ASI01-ASI10' },
+        { id: 'MEA-04', title: 'Explainability Assessment', desc: 'Explainability evaluation for client-impact decisions (KYC, AML, credit). Counter ASI09 (automation bias).', status: 'essential', nist: 'MEASURE 2.1', iso: '§A.9.2', owasp: 'ASI09' },
+        { id: 'MEA-05', title: 'Memory Integrity Checks', desc: 'Integrity verification of vector stores and persistent memories. Protection against ASI06.', status: 'important', nist: 'MEASURE 2.5', iso: '§A.7.2', owasp: 'ASI06' },
+      ]
+    },
+    manage: {
+      name: 'Manage & Respond', icon: '◆', ref: 'NIST AI RMF · MANAGE / ISO 42001 §9', cls: 'manage',
+      items: [
+        { id: 'MAN-01', title: 'Least Privilege per Agent', desc: 'Minimal permissions for each agent on each tool and API. Primary countermeasure for ASI02 and ASI03.', status: 'essential', nist: 'MANAGE 1.3', iso: '§A.8.2', owasp: 'ASI02·ASI03' },
+        { id: 'MAN-02', title: 'Kill-Switch & Rollback', desc: 'Emergency shutdown mechanism testable in < 5 min. Model rollback after updates. Critical for ASI10.', status: 'essential', nist: 'MANAGE 4.1', iso: '§8.3', owasp: 'ASI10·ASI08' },
+        { id: 'MAN-03', title: 'Circuit Breakers', desc: 'Circuit breakers and retry caps to prevent ASI08 (cascading failures).', status: 'essential', nist: 'MANAGE 3.1', iso: '§A.9.1', owasp: 'ASI08' },
+        { id: 'MAN-04', title: 'Session-Scoped Tokens', desc: 'Time-limited, task-scoped tokens. Memory isolation per session/user. Counter ASI03.', status: 'essential', nist: 'MANAGE 1.4', iso: '§A.7.1', owasp: 'ASI03' },
+      ]
+    },
+    agent: {
+      name: 'Agentic Specifics', icon: '▲', ref: 'OWASP ASI 2026 · FINMA 23/1', cls: 'agent',
+      items: [
+        { id: 'AGT-01', title: 'Input/Output Sandboxing', desc: 'Strict validation of external inputs (emails, docs, APIs) before agent processing. Data/instruction separation. ASI01.', status: 'essential', nist: 'MEASURE 2.5', iso: '§A.6.1.2', owasp: 'ASI01' },
+        { id: 'AGT-02', title: 'Code Execution Sandbox', desc: 'Full isolation of code execution generated by agents. Non-root, restricted network, timeout. ASI05.', status: 'essential', nist: 'MANAGE 1.1', iso: '§A.8.2', owasp: 'ASI05' },
+        { id: 'AGT-03', title: 'Inter-Agent mTLS + Signing', desc: 'Mutual authentication and message signing between agents. Anti-replay. Counter ASI07.', status: 'essential', nist: 'GOVERN 2.2', iso: '§A.6.1.3', owasp: 'ASI07' },
+        { id: 'AGT-04', title: 'Memory Segmentation', desc: 'Strict memory isolation by agent, session, and user. Scheduled expiration. Counter ASI06.', status: 'essential', nist: 'GOVERN 1.2', iso: '§A.7.2', owasp: 'ASI06' },
+        { id: 'AGT-05', title: 'Confidence & Source Display', desc: 'Mandatory display of confidence scores and source trace in outputs. Counter ASI09 (automation bias).', status: 'important', nist: 'GOVERN 1.6', iso: '§A.9.2', owasp: 'ASI09' },
+      ]
+    },
+    supply: {
+      name: 'AI Supply Chain', icon: '◭', ref: 'ISO 42001 §A.6 · OWASP ASI04', cls: 'supply',
+      items: [
+        { id: 'SC-01', title: 'LLM Provider Due Diligence', desc: 'Compliance assessment of LLM providers (SOC2, ISO27001, data processing, retention). Critical for all agents.', status: 'essential', nist: 'MAP 5.1', iso: '§A.6.1.5', owasp: 'ASI04' },
+        { id: 'SC-02', title: 'Tool/Plugin Signing', desc: 'Cryptographic verification of all dynamically loaded tools, plugins, and MCP servers. Counter ASI04.', status: 'essential', nist: 'MAP 5.2', iso: '§A.6.1.1', owasp: 'ASI04' },
+        { id: 'SC-03', title: 'Model Integrity Verification', desc: 'Integrity verification of deployed models. Detection of post-distribution alteration. Counter model poisoning.', status: 'important', nist: 'MEASURE 1.1', iso: '§A.6.1.1', owasp: 'ASI04' },
+        { id: 'SC-04', title: 'Exit Strategy per Provider', desc: 'Documented exit strategy for each critical LLM provider. Multi-provider fallback.', status: 'important', nist: 'MANAGE 4.2', iso: '§A.5.2', owasp: 'ASI04' },
+      ]
+    }
+  }
+};
+
+// ================================================================
+// ATTACKS DATA
+// ================================================================
+const ATTACKS_DATA = {
+  fr: [
+    {
+      id: 'AT01', name: 'ASI01 — Indirect Goal Hijack via Document KYC',
+      phase: 'INITIAL ACCESS', severity: 'critical', owasp: 'ASI01',
+      steps: [
+        { action: 'Reconnaissance', detail: 'L\'attaquant identifie qu\'un agent traite des documents KYC uploadés par les clients ou partenaires.' },
+        { action: 'Weaponization', detail: 'Injection d\'instructions malveillantes dans les métadonnées d\'un PDF KYC (invisible à l\'œil nu).' },
+        { action: 'Delivery', detail: 'Le document est soumis au processus d\'onboarding ou envoyé par email au gestionnaire de compte.' },
+        { action: 'Goal Hijack', detail: 'L\'agent de compliance exécute les instructions injectées : exfiltration de données UBO vers webhook externe.' },
+        { action: 'Impact', detail: 'Violation secret bancaire Art. 47 LB, données clients exfiltrées, violation FINMA Art. 9.' },
+      ],
+      complexity: 'MEDIUM', detectability: 'TRÈS FAIBLE', impact: 'CRITIQUE',
+      nist: 'MEASURE 2.5 · MANAGE 1.3', iso: 'A.6.1.2 · A.8.1'
+    },
+    {
+      id: 'AT02', name: 'ASI03 — Identity Abuse via Délégation SSO',
+      phase: 'PRIVILEGE ESCALATION', severity: 'critical', owasp: 'ASI03',
+      steps: [
+        { action: 'Context', detail: 'Un manager délègue une tâche à un agent bancaire via SSO. L\'agent hérite des permissions complètes du manager.' },
+        { action: 'Task Completion', detail: 'La tâche légitime est complétée, mais les tokens d\'accès admin ne sont pas révoqués.' },
+        { action: 'Exploitation', detail: 'L\'attaquant compromet l\'agent (via ASI01) et exploite les tokens persistants pour accéder aux systèmes core banking.' },
+        { action: 'Lateral Movement', detail: 'Accès aux données de l\'ensemble des clients du manager, potentiellement de toute la banque si admin persistant.' },
+      ],
+      complexity: 'MEDIUM', detectability: 'FAIBLE', impact: 'CRITIQUE',
+      nist: 'GOVERN 2.1 · MANAGE 1.4', iso: 'A.6.1.3 · A.7.1'
+    },
+    {
+      id: 'AT03', name: 'ASI04 — MCP Server Supply Chain Poisoning',
+      phase: 'SUPPLY CHAIN', severity: 'high', owasp: 'ASI04',
+      steps: [
+        { action: 'Target', detail: 'Identification d\'un MCP server utilisé par les agents bancaires pour accéder aux données de marché.' },
+        { action: 'Typosquatting', detail: 'Publication d\'un package MCP malveillant avec un nom quasi-identique sur le registry.' },
+        { action: 'Compromise', detail: 'Un développeur installe le mauvais package lors d\'une mise à jour. Le server compromis est déployé en production.' },
+        { action: 'Backdoor Activation', detail: 'Le MCP server malveillant injecte des instructions cachées dans les réponses transmises aux agents.' },
+        { action: 'Impact', detail: 'Tous les agents utilisant ce MCP server sont potentiellement compromis. Propagation systémique.' },
+      ],
+      complexity: 'HIGH', detectability: 'TRÈS FAIBLE', impact: 'ÉLEVÉ',
+      nist: 'MAP 5.1 · MAP 5.2', iso: 'A.6.1.1 · A.5.1'
+    },
+    {
+      id: 'AT04', name: 'ASI07 — Inter-Agent Message Forgery',
+      phase: 'LATERAL MOVEMENT', severity: 'high', owasp: 'ASI07',
+      steps: [
+        { action: 'Initial Foothold', detail: 'Compromission d\'un agent de reporting (faible criticité) via prompt injection sur un document.' },
+        { action: 'Message Forgery', detail: 'L\'agent compromis forge des messages semblant provenir de l\'agent de validation compliance (absence de mTLS).' },
+        { action: 'Trust Exploitation', detail: 'L\'agent de validation reçoit un message forgé lui demandant d\'approuver des transactions suspectes.' },
+        { action: 'Impact', detail: 'Transactions AML approuvées par un agent de confiance, sans intervention humaine. Logs indiquent une validation normale.' },
+      ],
+      complexity: 'HIGH', detectability: 'TRÈS FAIBLE', impact: 'ÉLEVÉ',
+      nist: 'GOVERN 2.2 · MAP 3.5', iso: 'A.6.1.3 · A.8.4'
+    },
+    {
+      id: 'AT05', name: 'ASI09 — Automation Bias Exploitation',
+      phase: 'SOCIAL ENGINEERING', severity: 'medium', owasp: 'ASI09',
+      steps: [
+        { action: 'Target', detail: 'Agent de conseil réglementaire utilisé par les gestionnaires de fortune pour des questions FINMA.' },
+        { action: 'Trigger', detail: 'Questions formulées pour induire des réponses confiantes mais incorrectes sur des seuils réglementaires.' },
+        { action: 'Trust Exploitation', detail: 'Le gestionnaire agit sur la base des informations incorrectes présentées avec une haute confiance.' },
+        { action: 'Impact', detail: 'Non-conformité réglementaire, violations de déclaration MROS, sanctions FINMA potentielles.' },
+      ],
+      complexity: 'FAIBLE', detectability: 'FAIBLE', impact: 'ÉLEVÉ',
+      nist: 'MEASURE 2.1 · GOVERN 1.6', iso: 'A.6.2.2 · A.9.2'
+    },
+    {
+      id: 'AT06', name: 'ASI08 — Cascading Failure via Outil Corrompu',
+      phase: 'IMPACT', severity: 'medium', owasp: 'ASI08',
+      steps: [
+        { action: 'Initial Failure', detail: 'Un outil partagé (ex: API de données de marché) retourne des données corrompues.' },
+        { action: 'Propagation', detail: 'Plusieurs agents en parallèle reçoivent ces données et prennent des décisions basées dessus.' },
+        { action: 'Retry Storm', detail: 'Les échecs déclenchent des boucles de retry qui saturent les systèmes back-end.' },
+        { action: 'Systemic Impact', detail: 'Ensemble du pipeline de surveillance AML indisponible. Impact réglementaire sur la continuité opérationnelle.' },
+      ],
+      complexity: 'FAIBLE', detectability: 'ÉLEVÉE', impact: 'MOYEN',
+      nist: 'MANAGE 3.1 · MAP 3.1', iso: 'A.8.3 · A.9.1'
+    },
+  ],
+  en: [
+    {
+      id: 'AT01', name: 'ASI01 — Indirect Goal Hijack via KYC Document',
+      phase: 'INITIAL ACCESS', severity: 'critical', owasp: 'ASI01',
+      steps: [
+        { action: 'Reconnaissance', detail: 'Attacker identifies that an agent processes KYC documents uploaded by clients or partners.' },
+        { action: 'Weaponization', detail: 'Malicious instructions injected into PDF KYC metadata (invisible to the naked eye).' },
+        { action: 'Delivery', detail: 'Document submitted through the onboarding process or emailed to the account manager.' },
+        { action: 'Goal Hijack', detail: 'The compliance agent executes injected instructions: UBO data exfiltration to external webhook.' },
+        { action: 'Impact', detail: 'Banking secrecy violation Art. 47 LB, client data exfiltrated, FINMA Art. 9 violation.' },
+      ],
+      complexity: 'MEDIUM', detectability: 'VERY LOW', impact: 'CRITICAL',
+      nist: 'MEASURE 2.5 · MANAGE 1.3', iso: 'A.6.1.2 · A.8.1'
+    },
+    {
+      id: 'AT02', name: 'ASI03 — Identity Abuse via SSO Delegation',
+      phase: 'PRIVILEGE ESCALATION', severity: 'critical', owasp: 'ASI03',
+      steps: [
+        { action: 'Context', detail: 'A manager delegates a task to a banking agent via SSO. The agent inherits the manager\'s full permissions.' },
+        { action: 'Task Completion', detail: 'The legitimate task is completed, but admin access tokens are not revoked.' },
+        { action: 'Exploitation', detail: 'Attacker compromises the agent (via ASI01) and exploits persistent tokens to access core banking systems.' },
+        { action: 'Lateral Movement', detail: 'Access to all clients of the manager, potentially the entire bank if admin token persists.' },
+      ],
+      complexity: 'MEDIUM', detectability: 'LOW', impact: 'CRITICAL',
+      nist: 'GOVERN 2.1 · MANAGE 1.4', iso: 'A.6.1.3 · A.7.1'
+    },
+    {
+      id: 'AT03', name: 'ASI04 — MCP Server Supply Chain Poisoning',
+      phase: 'SUPPLY CHAIN', severity: 'high', owasp: 'ASI04',
+      steps: [
+        { action: 'Target', detail: 'Identification of an MCP server used by banking agents to access market data.' },
+        { action: 'Typosquatting', detail: 'Publication of a malicious MCP package with a near-identical name on the registry.' },
+        { action: 'Compromise', detail: 'A developer installs the wrong package during an update. The compromised server is deployed to production.' },
+        { action: 'Backdoor Activation', detail: 'The malicious MCP server injects hidden instructions into responses transmitted to agents.' },
+        { action: 'Impact', detail: 'All agents using this MCP server potentially compromised. Systemic propagation.' },
+      ],
+      complexity: 'HIGH', detectability: 'VERY LOW', impact: 'HIGH',
+      nist: 'MAP 5.1 · MAP 5.2', iso: 'A.6.1.1 · A.5.1'
+    },
+    {
+      id: 'AT04', name: 'ASI07 — Inter-Agent Message Forgery',
+      phase: 'LATERAL MOVEMENT', severity: 'high', owasp: 'ASI07',
+      steps: [
+        { action: 'Initial Foothold', detail: 'Compromise of a reporting agent (low criticality) via prompt injection on a document.' },
+        { action: 'Message Forgery', detail: 'The compromised agent forges messages appearing to come from the compliance validation agent (no mTLS).' },
+        { action: 'Trust Exploitation', detail: 'The validation agent receives a forged message requesting approval of suspicious transactions.' },
+        { action: 'Impact', detail: 'AML transactions approved by a trusted agent, no human intervention. Logs show "normal validation".' },
+      ],
+      complexity: 'HIGH', detectability: 'VERY LOW', impact: 'HIGH',
+      nist: 'GOVERN 2.2 · MAP 3.5', iso: 'A.6.1.3 · A.8.4'
+    },
+    {
+      id: 'AT05', name: 'ASI09 — Automation Bias Exploitation',
+      phase: 'SOCIAL ENGINEERING', severity: 'medium', owasp: 'ASI09',
+      steps: [
+        { action: 'Target', detail: 'Regulatory advisory agent used by wealth managers for FINMA questions.' },
+        { action: 'Trigger', detail: 'Questions crafted to induce confident but incorrect responses about regulatory thresholds.' },
+        { action: 'Trust Exploitation', detail: 'Portfolio manager acts on incorrect information presented with high confidence.' },
+        { action: 'Impact', detail: 'Regulatory non-compliance, MROS reporting violations, potential FINMA sanctions.' },
+      ],
+      complexity: 'LOW', detectability: 'LOW', impact: 'HIGH',
+      nist: 'MEASURE 2.1 · GOVERN 1.6', iso: 'A.6.2.2 · A.9.2'
+    },
+    {
+      id: 'AT06', name: 'ASI08 — Cascading Failure via Corrupted Tool',
+      phase: 'IMPACT', severity: 'medium', owasp: 'ASI08',
+      steps: [
+        { action: 'Initial Failure', detail: 'A shared tool (e.g. market data API) returns corrupted data.' },
+        { action: 'Propagation', detail: 'Multiple parallel agents receive this data and make decisions based on it.' },
+        { action: 'Retry Storm', detail: 'Failures trigger retry loops that saturate back-end systems.' },
+        { action: 'Systemic Impact', detail: 'Entire AML monitoring pipeline unavailable. Regulatory impact on operational continuity.' },
+      ],
+      complexity: 'LOW', detectability: 'HIGH', impact: 'MEDIUM',
+      nist: 'MANAGE 3.1 · MAP 3.1', iso: 'A.8.3 · A.9.1'
+    },
+  ]
+};
+
+// ================================================================
+// WORKSHOP QUESTIONS
+// ================================================================
+const QUESTIONS_DATA = {
+  fr: [
+    { category: 'ASI01 · GOAL HIJACK', text: 'Vos agents traitant des documents externes (emails, PDFs, APIs) ont-ils des contrôles contre le prompt injection indirect ?', context: 'ASI01 est le risque #1 de l\'OWASP Agentic Top 10. Tout agent traitant du texte non maîtrisé est exposé. En banque privée, les documents KYC et emails clients sont des vecteurs privilégiés.', options: ['Contrôles validés en red team', 'Contrôles partiels en place', 'En cours de réflexion', 'Risque non identifié'], ref: 'OWASP ASI01 · NIST MEASURE 2.5', dim: 'asi01' },
+    { category: 'ASI02 · TOOL MISUSE', text: 'Appliquez-vous le principe de moindre privilège sur les outils accessibles à chaque agent ?', context: 'ASI02 : des agents sur-privilégiés peuvent supprimer des données, envoyer des emails non autorisés ou créer des boucles infinies. Le blast radius d\'un agent compromis est directement lié à ses permissions.', options: ['Least privilege strict par agent', 'Permissions partiellement réduites', 'Permissions par défaut utilisées', 'Aucune gestion des permissions'], ref: 'OWASP ASI02 · NIST MANAGE 1.3', dim: 'asi02' },
+    { category: 'ASI03 · IDENTITY ABUSE', text: 'Vos agents utilisent-ils des tokens limités dans le temps et scoped à la tâche, avec isolation mémoire par session ?', context: 'ASI03 est critique en contexte SSO bancaire. Un token persistant après délégation est une porte ouverte à l\'escalade de privilèges. La mémoire inter-session peut exposer des données d\'autres utilisateurs.', options: ['Tokens scoped + mémoire isolée', 'Tokens limités, mémoire partagée', 'Tokens long terme utilisés', 'Pas de gestion d\'identité agent'], ref: 'OWASP ASI03 · NIST GOVERN 2.1', dim: 'asi03' },
+    { category: 'ASI04 · SUPPLY CHAIN', text: 'Vérifiez-vous l\'intégrité et l\'authenticité de tous les composants chargés dynamiquement par vos agents (plugins, MCP servers, templates) ?', context: 'ASI04 : les agents chargent des composants à l\'exécution avec des permissions larges. Un seul composant compromis peut affecter tous les agents qui l\'utilisent.', options: ['AIBOM + signatures vérifiées', 'Vérification partielle', 'Registres non restreints', 'Aucune vérification'], ref: 'OWASP ASI04 · NIST MAP 5.1', dim: 'asi04' },
+    { category: 'ASI07 · INTER-AGENT', text: 'Vos communications inter-agents sont-elles protégées par mTLS et signature des messages avec protection anti-replay ?', context: 'ASI07 : sans authentification mutuelle, un agent compromis peut se faire passer pour un autre agent de confiance. Particulièrement dangereux dans les pipelines de validation compliance.', options: ['mTLS + signing + anti-replay', 'TLS uniquement', 'Communication non sécurisée', 'Pas d\'architecture multi-agents'], ref: 'OWASP ASI07 · NIST GOVERN 2.2', dim: 'asi07' },
+    { category: 'ASI08 · CASCADING', text: 'Avez-vous implémenté des circuit breakers et des plafonds de retry pour vos pipelines d\'agents critiques ?', context: 'ASI08 : une seule défaillance peut se propager et s\'amplifier à travers tout un pipeline multi-agents. Particulièrement critique pour les pipelines AML et de surveillance en temps réel.', options: ['Circuit breakers + caps + isolation', 'Retry limits uniquement', 'Pas de protection spécifique', 'Non applicable'], ref: 'OWASP ASI08 · NIST MANAGE 3.1', dim: 'asi08' },
+    { category: 'ASI09 · TRUST EXPLOIT', text: 'Vos agents affichent-ils des scores de confiance et des traces sources pour contrer l\'automation bias ?', context: 'ASI09 : les humains approuvent trop facilement les recommandations confiantes des agents. En banque privée, une décision incorrecte approuvée par automation bias peut avoir des conséquences réglementaires graves.', options: ['Confiance + source + review forcé', 'Scores de confiance uniquement', 'Pas d\'indicateurs de confiance', 'Les agents sont systématiquement vérifiés'], ref: 'OWASP ASI09 · NIST GOVERN 1.6', dim: 'asi09' },
+    { category: 'ASI10 · ROGUE AGENT', text: 'Disposez-vous d\'un monitoring comportemental continu et d\'un kill-switch testable pour vos agents en production ?', context: 'ASI10 : les agents peuvent dériver silencieusement après des mises à jour de modèle ou une accumulation de mémoire. Sans monitoring comportemental, cette dérive peut passer inaperçue pendant des semaines.', options: ['Monitoring + kill-switch testé', 'Monitoring basique uniquement', 'Kill-switch non testé', 'Aucun mécanisme'], ref: 'OWASP ASI10 · NIST MANAGE 4.1', dim: 'asi10' },
+  ],
+  en: [
+    { category: 'ASI01 · GOAL HIJACK', text: 'Do your agents processing external documents (emails, PDFs, APIs) have controls against indirect prompt injection?', context: 'ASI01 is the #1 risk in the OWASP Agentic Top 10. Any agent processing uncontrolled text is exposed. In private banking, KYC documents and client emails are primary vectors.', options: ['Controls validated in red team', 'Partial controls in place', 'Under consideration', 'Risk not identified'], ref: 'OWASP ASI01 · NIST MEASURE 2.5', dim: 'asi01' },
+    { category: 'ASI02 · TOOL MISUSE', text: 'Do you apply the least privilege principle to tools accessible by each agent?', context: 'ASI02: over-privileged agents can delete data, send unauthorized emails, or create infinite loops. The blast radius of a compromised agent is directly linked to its permissions.', options: ['Strict least privilege per agent', 'Partially reduced permissions', 'Default permissions used', 'No permission management'], ref: 'OWASP ASI02 · NIST MANAGE 1.3', dim: 'asi02' },
+    { category: 'ASI03 · IDENTITY ABUSE', text: 'Do your agents use time-limited task-scoped tokens with memory isolation per session?', context: 'ASI03 is critical in banking SSO contexts. A persistent token after delegation is a privilege escalation risk. Cross-session memory can expose other users\' data.', options: ['Scoped tokens + isolated memory', 'Limited tokens, shared memory', 'Long-lived tokens used', 'No agent identity management'], ref: 'OWASP ASI03 · NIST GOVERN 2.1', dim: 'asi03' },
+    { category: 'ASI04 · SUPPLY CHAIN', text: 'Do you verify the integrity and authenticity of all dynamically loaded agent components (plugins, MCP servers, templates)?', context: 'ASI04: agents load components at runtime with broad permissions. A single compromised component can affect all agents using it.', options: ['AIBOM + verified signatures', 'Partial verification', 'Unrestricted registries', 'No verification'], ref: 'OWASP ASI04 · NIST MAP 5.1', dim: 'asi04' },
+    { category: 'ASI07 · INTER-AGENT', text: 'Are your inter-agent communications protected by mTLS and message signing with anti-replay protection?', context: 'ASI07: without mutual authentication, a compromised agent can impersonate a trusted agent. Particularly dangerous in compliance validation pipelines.', options: ['mTLS + signing + anti-replay', 'TLS only', 'Unsecured communication', 'No multi-agent architecture'], ref: 'OWASP ASI07 · NIST GOVERN 2.2', dim: 'asi07' },
+    { category: 'ASI08 · CASCADING', text: 'Have you implemented circuit breakers and retry caps for your critical agent pipelines?', context: 'ASI08: a single failure can propagate and amplify across an entire multi-agent pipeline. Particularly critical for AML and real-time monitoring pipelines.', options: ['Circuit breakers + caps + isolation', 'Retry limits only', 'No specific protection', 'Not applicable'], ref: 'OWASP ASI08 · NIST MANAGE 3.1', dim: 'asi08' },
+    { category: 'ASI09 · TRUST EXPLOIT', text: 'Do your agents display confidence scores and source traces to counter automation bias?', context: 'ASI09: humans approve confident agent recommendations too easily. In private banking, an incorrect decision approved through automation bias can have serious regulatory consequences.', options: ['Confidence + source + forced review', 'Confidence scores only', 'No confidence indicators', 'Agents are systematically verified'], ref: 'OWASP ASI09 · NIST GOVERN 1.6', dim: 'asi09' },
+    { category: 'ASI10 · ROGUE AGENT', text: 'Do you have continuous behavioral monitoring and a testable kill-switch for your production agents?', context: 'ASI10: agents can drift silently after model updates or memory accumulation. Without behavioral monitoring, this drift can go undetected for weeks.', options: ['Monitoring + tested kill-switch', 'Basic monitoring only', 'Untested kill-switch', 'No mechanism'], ref: 'OWASP ASI10 · NIST MANAGE 4.1', dim: 'asi10' },
+  ]
+};
+
+// ================================================================
+// STATE
+// ================================================================
+let currentQuestion = 0;
+let answers = [];
+let apiKey = '';
+let activeFilter = 'all';
+const scoreDims = {
+  asi01: { label: 'ASI01 Goal Hijack', color: '#ff3860', val: 0 },
+  asi02: { label: 'ASI02 Tool Misuse', color: '#ff6b35', val: 0 },
+  asi03: { label: 'ASI03 Identity', color: '#ffb800', val: 0 },
+  asi04: { label: 'ASI04 Supply Chain', color: '#c084fc', val: 0 },
+  asi07: { label: 'ASI07 Inter-Agent', color: '#00c8ff', val: 0 },
+  asi08: { label: 'ASI08 Cascading', color: '#a0ff6b', val: 0 },
+  asi09: { label: 'ASI09 Trust Exploit', color: '#ffb800', val: 0 },
+  asi10: { label: 'ASI10 Rogue Agent', color: '#ff3860', val: 0 },
+};
+
+// ================================================================
+// BUILD MATRIX
+// ================================================================
+function buildMatrix() {
+  const grid = document.getElementById('matrix-grid');
+  grid.innerHTML = '';
+  for (let y = 5; y >= 1; y--) {
+    for (let x = 1; x <= 5; x++) {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      cell.dataset.x = x; cell.dataset.y = y;
+      grid.appendChild(cell);
+    }
+  }
+  const risks = RISKS_DATA[currentLang];
+  risks.forEach(r => {
+    const xPct = ((r.likelihood - 0.5) / 5) * 100;
+    const yPct = ((5 - r.impact + 0.5) / 5) * 100;
+    const bubble = document.createElement('div');
+    bubble.className = `risk-bubble ${r.severity}`;
+    bubble.style.left = xPct + '%';
+    bubble.style.top = yPct + '%';
+    bubble.dataset.id = r.id;
+    bubble.dataset.severity = r.severity;
+    bubble.innerHTML = `<div class="bubble-inner">${r.label}</div><div class="bubble-label">${r.name}</div>`;
+    bubble.addEventListener('click', () => showRiskDetail(r.id));
+    grid.appendChild(bubble);
+  });
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.risk-bubble').forEach(b => {
+    const show = f === 'all' || b.dataset.severity === f;
+    b.style.opacity = show ? '1' : '0.1';
+    b.style.pointerEvents = show ? 'auto' : 'none';
+  });
+}
+
+function showRiskDetail(id) {
+  const r = RISKS_DATA[currentLang].find(x => x.id === id);
+  if (!r) return;
+  const colorMap = { critical: 'var(--danger)', high: 'var(--warn)', medium: 'var(--accent2)' };
+  const panel = document.getElementById('risk-detail-panel');
+  panel.style.borderLeftColor = colorMap[r.severity] || 'var(--accent)';
+  const nistTags = r.nist.map(t => `<span class="tag nist">${t}</span>`).join('');
+  const isoTags = r.iso.map(t => `<span class="tag iso">${t}</span>`).join('');
+  const finmaTags = r.finma.length ? r.finma.map(t => `<span class="tag finma">${t}</span>`).join('') : `<span class="tag">${currentLang==='fr'?'N/A':'N/A'}</span>`;
+  const examplesHtml = r.examples.map(e => `<li>${e}</li>`).join('');
+  panel.innerHTML = `
+    <div class="risk-detail-header">
+      <span class="risk-id-badge ${r.severity}">${r.id} · ${r.severity.toUpperCase()}</span>
+      <span class="owasp-badge" style="font-size:9px;">${r.owasp}</span>
+      <span class="risk-detail-title">${r.name}</span>
+    </div>
+    <p style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:14px;">${r.desc}</p>
+    <div class="risk-detail-grid">
+      <div class="detail-block"><label>${t('detail-context')}</label><p>${r.context}</p></div>
+      <div class="detail-block">
+        <label>${t('detail-examples')}</label>
+        <ul class="examples-list">${examplesHtml}</ul>
+      </div>
+      <div class="detail-block">
+        <label>${t('detail-mitigation')}</label>
+        <p style="margin-bottom:10px;">${r.mitigation}</p>
+        <label>${t('detail-refs')}</label>
+        <div class="tag-list" style="margin-bottom:4px;"><span class="tag owasp">${r.owasp}</span></div>
+        <div class="tag-list" style="margin-bottom:4px;">${nistTags}</div>
+        <div class="tag-list" style="margin-bottom:4px;">${isoTags}</div>
+        <div class="tag-list">${finmaTags}</div>
+      </div>
+    </div>
+  `;
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ================================================================
+// CONTROLS
+// ================================================================
+function buildDomainGrid() {
+  const grid = document.getElementById('domain-grid');
+  const data = CONTROLS_DATA[currentLang];
+  grid.innerHTML = Object.entries(data).map(([key, domain]) => `
+    <div class="domain-card ${domain.cls}" onclick="showDomain('${key}',this)">
+      <div class="domain-icon">${domain.icon}</div>
+      <div class="domain-name">${domain.name}</div>
+      <div class="domain-ref">${domain.ref}</div>
+      <div class="domain-count">${domain.items.length} <span>${currentLang==='fr'?'contrôles':'controls'}</span></div>
+    </div>
+  `).join('');
+  document.getElementById('controls-panel').classList.remove('visible');
+  document.getElementById('controls-panel').innerHTML = '';
+}
+
+function showDomain(domainKey, card) {
+  document.querySelectorAll('.domain-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  const domain = CONTROLS_DATA[currentLang][domainKey];
+  const panel = document.getElementById('controls-panel');
+  panel.innerHTML = `
+    <div class="controls-panel-header">${domain.name} — ${domain.items.length} ${currentLang==='fr'?'contrôles':'controls'}</div>
+    ${domain.items.map(c => `
+      <div class="control-item">
+        <div class="control-id">${c.id}<br><span style="color:var(--accent2);font-size:8px;">${c.owasp}</span></div>
+        <div>
+          <div class="control-title">${c.title}</div>
+          <div class="control-desc">${c.desc}</div>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+            <span class="tag nist">${c.nist}</span>
+            <span class="tag iso">${c.iso}</span>
+          </div>
+        </div>
+        <div><span class="control-status ${c.status}">${c.status.toUpperCase()}</span></div>
+      </div>
+    `).join('')}
+  `;
+  panel.classList.add('visible');
+}
+
+// ================================================================
+// RED TEAM
+// ================================================================
+function buildAttackTree() {
+  const list = document.getElementById('attack-tree-list');
+  const attacks = ATTACKS_DATA[currentLang];
+  const phaseColors = { 'INITIAL ACCESS': '#ff3860', 'PRIVILEGE ESCALATION': '#ffb800', 'SUPPLY CHAIN': '#c084fc', 'LATERAL MOVEMENT': '#ff6b35', 'SOCIAL ENGINEERING': '#00c8ff', 'IMPACT': '#a0ff6b' };
+  list.innerHTML = attacks.map(a => `
+    <div class="tree-item" id="tree-${a.id}" onclick="showAttack('${a.id}')">
+      <div class="tree-indicator" style="background:${phaseColors[a.phase]||'var(--text-dim)'}"></div>
+      <div>
+        <div style="font-size:8px;letter-spacing:1px;color:var(--accent2);margin-bottom:1px;">${a.owasp}</div>
+        <div style="font-size:10px;">${a.name}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('attack-detail-panel').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-family:var(--mono);font-size:11px;letter-spacing:1px;">${t('rt-select')}</div>`;
+}
+
+function showAttack(id) {
+  const attacks = ATTACKS_DATA[currentLang];
+  const a = attacks.find(x => x.id === id);
+  if (!a) return;
+  document.querySelectorAll('.tree-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('tree-' + id)?.classList.add('active');
+  const panel = document.getElementById('attack-detail-panel');
+  panel.innerHTML = `
+    <div class="attack-detail-header">
+      <div class="attack-phase">${a.owasp} · ${a.phase}</div>
+      <div class="attack-name">${a.name}</div>
+    </div>
+    <div class="attack-body">
+      <div style="margin-bottom:20px;">
+        ${a.steps.map((s, i) => `
+          <div class="step-item">
+            <div class="step-num">${String(i+1).padStart(2,'0')}</div>
+            <div>
+              <div class="step-action">${s.action}</div>
+              <div class="step-detail">${s.detail}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="attack-meta-grid">
+        <div class="meta-block"><label>${currentLang==='fr'?'Complexité Attaquant':'Attacker Complexity'}</label><div class="meta-val">${a.complexity}</div></div>
+        <div class="meta-block"><label>${currentLang==='fr'?'Détectabilité':'Detectability'}</label><div class="meta-val" style="color:${a.detectability.includes('TRÈS') || a.detectability.includes('VERY') ? 'var(--danger)' : a.detectability === 'FAIBLE' || a.detectability === 'LOW' ? 'var(--warn)' : 'var(--accent3)'}">${a.detectability}</div></div>
+        <div class="meta-block"><label>Impact</label><div class="meta-val ${a.severity}">${a.impact}</div></div>
+        <div class="meta-block" style="grid-column:1/-1;"><label>${currentLang==='fr'?'Contrôles Référencés':'Referenced Controls'}</label><div class="meta-val" style="font-size:10px;color:var(--text-dim)">${a.nist} · ${a.iso}</div></div>
+      </div>
+    </div>
+  `;
+}
+
+// ================================================================
+// WORKSHOP
+// ================================================================
+function renderQuestion() {
+  const questions = QUESTIONS_DATA[currentLang];
+  if (answers.length !== questions.length) answers = new Array(questions.length).fill(null);
+  const q = questions[currentQuestion];
+  const body = document.getElementById('question-body');
+  body.innerHTML = `
+    <div class="q-category">${q.category}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="q-context">${q.context}</div>
+    <div class="answer-options">
+      ${q.options.map((opt, i) => `<button class="answer-btn ${answers[currentQuestion]===i?'selected':''}" onclick="selectAnswer(${i})">${opt}</button>`).join('')}
+    </div>
+  `;
+  document.getElementById('deck-progress').textContent = `${currentQuestion + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+  document.getElementById('q-ref-label').textContent = q.ref;
+}
+
+function selectAnswer(i) {
+  answers[currentQuestion] = i;
+  const q = QUESTIONS_DATA[currentLang][currentQuestion];
+  const dim = q.dim;
+  if (scoreDims[dim]) scoreDims[dim].val = Math.min(3, (i === 0 ? 3 : i === 1 ? 2 : i === 2 ? 1 : 0));
+  renderQuestion();
+  updateScorePanel();
+  if (apiKey && apiKey.startsWith('sk-ant-')) generateInsight(q, q.options[i]);
+}
+
+function updateScorePanel() {
+  const labels = t('severity-labels');
+  const container = document.getElementById('score-dimensions');
+  container.innerHTML = Object.entries(scoreDims).map(([key, dim]) => {
+    const pct = Math.min(100, (dim.val / 3) * 100);
+    return `<div class="score-dimension">
+      <div class="score-dim-header">
+        <span class="score-dim-name">${dim.label}</span>
+        <span class="score-dim-val">${dim.val > 0 ? labels[Math.min(3,dim.val)] : '—'}</span>
+      </div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%;background:${dim.color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function nextQuestion() { const q = QUESTIONS_DATA[currentLang]; if (currentQuestion < q.length - 1) { currentQuestion++; renderQuestion(); } }
+function prevQuestion() { if (currentQuestion > 0) { currentQuestion--; renderQuestion(); } }
+
+async function generateInsight(q, selected) {
+  const insightText = document.getElementById('ai-insight-text');
+  insightText.innerHTML = `<span class="loading-dots">${currentLang==='fr'?'Analyse en cours':'Analyzing'}</span>`;
+  const prompt = currentLang === 'fr'
+    ? `Tu es expert cybersécurité spécialisé banques privées suisses (FINMA, OWASP Agentic Top 10 2026, NIST AI RMF, ISO 42001).\n\nQuestion posée au CISO: "${q.text}"\nRisque OWASP: ${q.category}\nRéponse: "${selected}"\n\nEn 3 phrases directes (style CISO, pas de liste): 1) Implication concrète pour banque privée suisse 2) Risque réglementaire FINMA si applicable 3) Action prioritaire recommandée.`
+    : `You are a cybersecurity expert specializing in Swiss private banks (FINMA, OWASP Agentic Top 10 2026, NIST AI RMF, ISO 42001).\n\nCISO question: "${q.text}"\nOWASP Risk: ${q.category}\nAnswer: "${selected}"\n\nIn 3 direct sentences (CISO style, no bullet points): 1) Concrete implication for Swiss private bank 2) FINMA regulatory risk if applicable 3) Recommended priority action.`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    insightText.textContent = data.content?.[0]?.text || (currentLang==='fr'?'Erreur API.':'API error.');
+  } catch(e) {
+    insightText.textContent = currentLang==='fr'?'Connexion API impossible.':'API connection failed.';
+  }
+}
+
+function saveApiKey() {
+  apiKey = document.getElementById('api-key-input').value.trim();
+  const status = document.getElementById('api-status');
+  if (apiKey.startsWith('sk-ant-')) { status.textContent = '✓ ACTIVE'; status.style.color = 'var(--accent3)'; }
+  else if (apiKey) { status.textContent = '⚠ INVALID'; status.style.color = 'var(--warn)'; }
+  else { status.textContent = currentLang==='fr'?'MODE DÉMO':'DEMO MODE'; status.style.color = 'var(--text-dim)'; }
+}
+
+// ================================================================
+// TAB SWITCH
+// ================================================================
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ================================================================
+// INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  buildMatrix();
+  buildDomainGrid();
+  buildAttackTree();
+  renderQuestion();
+  updateScorePanel();
+  applyTranslations();
+});
+</script>
+</body>
+</html>
